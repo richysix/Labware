@@ -1,7 +1,6 @@
 package Labware::WellMethods;
-use namespace::autoclean;
 use Moose::Role;
-use Moose::Util::TypeConstraints;
+use namespace::autoclean;
 use List::MoreUtils qw( any );
 use Carp qw(cluck confess);
 

@@ -1,7 +1,7 @@
 package Labware::Plate;
-use namespace::autoclean;
 use Moose;
 use Moose::Util::TypeConstraints;
+use namespace::autoclean;
 use Labware::Well;
 use Carp qw( cluck confess );
 use English qw( -no_match_vars );

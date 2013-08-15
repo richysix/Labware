@@ -1,7 +1,7 @@
 package Labware::Well;
-use namespace::autoclean;
 use Moose;
 use Moose::Util::TypeConstraints;
+use namespace::autoclean;
 use Carp qw(cluck confess);
 use Scalar::Util qw( weaken );
 
