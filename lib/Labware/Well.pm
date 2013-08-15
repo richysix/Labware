@@ -1,4 +1,17 @@
+## no critic (RequireUseStrict, RequireUseWarnings, RequireTidyCode)
 package Labware::Well;
+## use critic
+
+# ABSTRACT: Object representing a Well of a microtitre Plate
+
+## Author         : rw4
+## Maintainer     : rw4
+## Created        : 2013-08-15
+## Last commit by : $Author$
+## Last modified  : $Date$
+## Revision       : $Revision$
+## Repository URL : $HeadURL$
+
 use warnings;
 use strict;
 use Moose;
@@ -8,8 +21,6 @@ use Carp qw(cluck confess);
 use Scalar::Util qw( weaken );
 
 enum 'Labware::Well::plate_type', [qw( 96 384 )];
-
-# ABSTRACT: Object representing a Well of a microtitre Plate
 
 =method new
 

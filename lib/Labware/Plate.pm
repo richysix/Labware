@@ -1,4 +1,17 @@
+## no critic (RequireUseStrict, RequireUseWarnings, RequireTidyCode)
 package Labware::Plate;
+## use critic
+
+# ABSTRACT: Object representing a microtitre Plate
+
+## Author         : rw4
+## Maintainer     : rw4
+## Created        : 2013-08-15
+## Last commit by : $Author$
+## Last modified  : $Date$
+## Revision       : $Revision$
+## Repository URL : $HeadURL$
+
 use warnings;
 use strict;
 use Moose;
@@ -11,8 +24,6 @@ use English qw( -no_match_vars );
 enum 'Labware::Plate::plate_type', [qw( 96 384 )];
 
 enum 'Labware::Plate::direction', [qw( row column )];
-
-# ABSTRACT: Object representing a microtitre Plate
 
 =method new
 

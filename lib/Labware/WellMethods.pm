@@ -1,4 +1,17 @@
+## no critic (RequireUseStrict, RequireUseWarnings, RequireTidyCode)
 package Labware::WellMethods;
+## use critic
+
+# ABSTRACT: Role of methods shared between Wells and Plates
+
+## Author         : rw4
+## Maintainer     : rw4
+## Created        : 2013-08-15
+## Last commit by : $Author$
+## Last modified  : $Date$
+## Revision       : $Revision$
+## Repository URL : $HeadURL$
+
 use warnings;
 use strict;
 use Moose::Role;
@@ -7,8 +20,6 @@ use List::MoreUtils qw( any );
 use Carp qw(cluck confess);
 
 requires 'plate_type';
-
-# ABSTRACT: Role of methods shared between Wells and Plates
 
 =method number_of_rows
 
