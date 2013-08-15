@@ -1,4 +1,6 @@
 package Labware::Plate;
+use warnings;
+use strict;
 use Moose;
 use Moose::Util::TypeConstraints;
 use namespace::autoclean;
@@ -9,6 +11,8 @@ use English qw( -no_match_vars );
 enum 'Labware::Plate::plate_type', [qw( 96 384 )];
 
 enum 'Labware::Plate::direction', [qw( row column )];
+
+# ABSTRACT: Object representing a microtitre Plate
 
 =method new
 
@@ -168,7 +172,7 @@ sub fill_well {
     if( !$well_id ){
         confess "Method fill_well requires a well id.\n";
     }
-    $self->check_well_id_validity($well_id) )
+    $self->check_well_id_validity($well_id);
     # make well object and add to plate
     my $well = Labware::Well->new(
         plate_type => $self->plate_type,

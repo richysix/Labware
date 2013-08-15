@@ -1,10 +1,14 @@
 package Labware::WellMethods;
+use warnings;
+use strict;
 use Moose::Role;
 use namespace::autoclean;
 use List::MoreUtils qw( any );
 use Carp qw(cluck confess);
 
 requires 'plate_type';
+
+# ABSTRACT: Role of methods shared between Wells and Plates
 
 =method number_of_rows
 

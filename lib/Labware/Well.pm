@@ -1,4 +1,6 @@
 package Labware::Well;
+use warnings;
+use strict;
 use Moose;
 use Moose::Util::TypeConstraints;
 use namespace::autoclean;
@@ -6,6 +8,8 @@ use Carp qw(cluck confess);
 use Scalar::Util qw( weaken );
 
 enum 'Labware::Well::plate_type', [qw( 96 384 )];
+
+# ABSTRACT: Object representing a Well of a microtitre Plate
 
 =method new
 
