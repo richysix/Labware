@@ -128,7 +128,7 @@ with 'Labware::WellMethods';
 
 sub add_well {
     my ( $self, $well ) = @_;
-    if( ref $well && !$well->isa('Labware::Well') ){
+    if( !ref $well || !$well->isa('Labware::Well') ){
         confess "This method requires a LabWare::Well object, not a ", ref $well, " one.\n";
     }
     my ( $rowi, $coli ) = $self->well_id_to_indices( $well->position );
