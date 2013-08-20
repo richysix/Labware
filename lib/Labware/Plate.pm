@@ -186,6 +186,7 @@ sub fill_well {
     $self->check_well_id_validity($well_id);
     # make well object and add to plate
     my $well = Labware::Well->new(
+        plate => $self,
         plate_type => $self->plate_type,
         position => $well_id,
         contents => $contents,
