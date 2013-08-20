@@ -64,24 +64,11 @@ enum 'Labware::Well::plate_type', [qw( 96 384 )];
 
 =cut
 
-=method plate_id
-
-  Usage       : $well->plate_id
-  Purpose     : Getter for plate_id attribute of the Plate object
-  Returns     : Integer
-  Parameters  : None
-  Throws      : If input is given
-                If plate attribute is undefined
-  Comments    : None
-
-=cut
-
 has 'plate' => (
     is => 'ro',
     isa => 'Labware::Plate',
     handles => {
         plate_name => 'plate_name',
-        plate_id => 'plate_id',
     },
 );
 
