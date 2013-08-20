@@ -5,7 +5,7 @@ use Test::Exception;
 use Test::Warn;
 use Test::MockObject;
 
-plan tests => 464;
+plan tests => 26 + 3 + 5 + 5 + 4 + 3 + 5 + 9 + 1 + 6 + 3 + 6 + 2 + 4 + 96 * 4;
 
 use lib '/nfs/users/nfs_r/rw4/perl5/lib/perl5/';
 
@@ -70,7 +70,8 @@ is( $plate->fill_direction, 'column', 'Get default fill_direction' );
 is( $plate_2->fill_direction, 'row', 'Get fill_direction 2' );
 is( $plate_3->fill_direction, 'column', 'Get fill_direction 3' );
 
-# methods 
+# methods
+# should really use mock well object
 # add real well
 use Labware::Well;
 my $well = Labware::Well->new(
@@ -78,11 +79,15 @@ my $well = Labware::Well->new(
     position => 'A01',
     contents => 'String contents',
 );
-# add and return a single well - 3 tests
+# add and return a single well - 5 tests
 $plate->add_well( $well );
 is( $plate->return_well('A01')->position, 'A01', 'Add single well - Position of returned well');
 is( $plate->return_well('A01')->plate_type, '96', 'Add single well - Plate type of returned well');
 is( $plate->return_well('A01')->contents, 'String contents', 'Add single well - contents of returned well');
+throws_ok{ $plate->add_well('well') } qr/method\srequires\sa\sLabWare::Well\sobject/, 'try to add String';
+my $tmp_mock_plate = Test::MockObject->new();
+$tmp_mock_plate->set_isa('Labware::Plate');
+throws_ok{ $plate->add_well('$tmp_mock_plate') } qr/method\srequires\sa\sLabWare::Well\sobject/, 'try to add non Well object';
 
 # add several wells
 my @wells;
@@ -106,7 +111,7 @@ for ( my $i = 3; $i < 12; $i+=3 ){
     is( $plate->return_well($id)->contents, $id, 'add several wells - contents of returned well');
 }
 
-# try to add a well to an already filled well
+# try to add a well to an already filled well - 1 test
 throws_ok { $plate->add_well( $well ) } qr/Well is not empty!/, 'Attempt to fill an already filled well';
 
 # add column of wells
@@ -187,6 +192,7 @@ my $wrong = 0;
 my @row_names = qw{A B C D E F G H};
 my @column_names = qw{ 01 02 03 04 05 06 07 08 09 10 11 12 };
 my ( $rowi, $coli );
+# 96 * 4 tests
 for ( 1..96 ){
     my $well = shift @{$returned_wells_2};
     ( $rowi, $coli ) = $plate_4->_well_number_to_indices( $_ );
