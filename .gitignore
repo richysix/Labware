@@ -1,3 +1,4 @@
 .build/
 perltidy.LOG
+Labware-*
 *.gz
