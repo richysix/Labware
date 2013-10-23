@@ -35,8 +35,7 @@ requires 'plate_type';
 sub number_of_rows {
     my ( $self, ) = @_;
     my $num_rows =      $self->plate_type eq '96'       ?   8
-        :               $self->plate_type eq '384'      ?   16
-        :                                                   8
+        :                                                   16
         ;
     return $num_rows;
 }
@@ -55,8 +54,7 @@ sub number_of_rows {
 sub number_of_columns {
     my ( $self, ) = @_;
     my $num_columns =   $self->plate_type eq '96'       ?   12
-        :               $self->plate_type eq '384'      ?   24
-        :                                                   12
+        :                                                   24
         ;
     return $num_columns;
 }
