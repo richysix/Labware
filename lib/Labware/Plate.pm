@@ -161,11 +161,6 @@ sub add_wells {
     return 1;
 }
 
-#sub _add_well_using_indices {
-#    my ( $self, $well, $rowi, $columni ) = @_;
-#    $self->wells->[$columni][$rowi] = $well;
-#}
-
 =method fill_well
 
   Usage       : $plate->fill_well( $contents, 'A01' );
@@ -232,8 +227,8 @@ sub fill_wells_from_starting_well {
         eval {
             $well_id = $self->next_well_id( $well_id );
         };
-        if( $EVAL_ERROR && $EVAL_ERROR eq 'END OF PLATE' && @new_list ){
-            confess $EVAL_ERROR;
+        if( $EVAL_ERROR && $EVAL_ERROR =~ m/END\sOF\sPLATE/xms && @new_list ){
+            confess "Reached the end of the plate and still have contents left!\n";
         }
     }
     return 1;
@@ -284,11 +279,11 @@ sub return_well {
 =method return_all_wells
 
   Usage       : $plate->return_all_wells;
-  Purpose     : Getter for all wells
+  Purpose     : Getter for all wells, whether empty or not
   Returns     : ArrayRef of Labware::Well objects
   Parameters  : None
   Throws      : 
-  Comments    :
+  Comments    : Wells are unrolled into an Array in plate-fill order
 
 =cut
 
@@ -299,11 +294,43 @@ sub return_all_wells {
     my @wells;
     my $done = 0;
     while( !$done ){
+        push @wells, $wells->[$coli]->[$rowi];
+        eval{
+            ( $rowi, $coli ) = $self->_increment_indices( $rowi, $coli );
+        };
+        if( $EVAL_ERROR && $EVAL_ERROR =~ m/END\sOF\sPLATE/xms ){
+            $done = 1;
+        }
+        elsif( $EVAL_ERROR ){
+            confess $EVAL_ERROR;
+        }
+    }
+    return \@wells;
+}
+
+=method return_all_non_empty_wells
+
+  Usage       : $plate->return_all_non_empty_wells;
+  Purpose     : Getter for all non-empty wells in plate order
+  Returns     : ArrayRef of Labware::Well objects
+  Parameters  : None
+  Throws      : 
+  Comments    : Wells are unrolled into an Array in plate-fill order
+
+=cut
+
+sub return_all_non_empty_wells {
+    my ( $self, ) = @_;
+    my ( $rowi, $coli ) = ( 0, 0 );
+    my $wells = $self->wells;
+    my @wells;
+    my $done = 0;
+    while( !$done ){
         if( !$self->_check_well_is_empty( $rowi, $coli ) ){
             push @wells, $wells->[$coli]->[$rowi];
         }
         eval{
-            ( $rowi, $coli ) = $self->_increment_indices( $rowi, $coli ) if !$done;
+            ( $rowi, $coli ) = $self->_increment_indices( $rowi, $coli );
         };
         if( $EVAL_ERROR && $EVAL_ERROR =~ m/END\sOF\sPLATE/xms ){
             $done = 1;
@@ -574,6 +601,26 @@ sub _build_empty_wells {
     my $wells = [];
     for( 0..$self->number_of_columns - 1 ){
         $wells->[$_] = [];
+    }
+    my $done = 0;
+    my ( $rowi, $coli ) = ( 0, 0 );
+    while( !$done ){
+        my $well = Labware::Well->new(
+            plate => $self,
+            plate_type => $self->plate_type,
+            position => $self->_indices_to_well_id( $rowi, $coli ),
+            contents => undef,
+        );
+        $wells->[$coli]->[$rowi] = $well;
+        eval{
+            ( $rowi, $coli ) = $self->_increment_indices( $rowi, $coli );
+        };
+        if( $EVAL_ERROR && $EVAL_ERROR =~ m/END\sOF\sPLATE/xms ){
+            $done = 1;
+        }
+        elsif( $EVAL_ERROR ){
+            confess $EVAL_ERROR;
+        }
     }
     return $wells;
 }
