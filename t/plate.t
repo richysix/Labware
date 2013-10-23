@@ -5,9 +5,7 @@ use Test::Exception;
 use Test::Warn;
 use Test::MockObject;
 
-plan tests => 26 + 3 + 5 + 5 + 4 + 3 + 5 + 9 + 1 + 6 + 3 + 6 + 2 + 4 + 96 * 4;
-
-use lib '/nfs/users/nfs_r/rw4/perl5/lib/perl5/';
+plan tests => 26 + 3 + 5 + 5 + 4 + 3 + 7 + 12 + 7 + 5 + 13 + 2 + 4 + 96 * 4 + 4 + 4;
 
 use Labware::Plate;
 
@@ -79,11 +77,13 @@ my $well = Labware::Well->new(
     position => 'A01',
     contents => 'String contents',
 );
-# add and return a single well - 5 tests
-$plate->add_well( $well );
+# add and return a single well - 7 tests
+ok( $plate->add_well( $well ), 'Add single well');
 is( $plate->return_well('A01')->position, 'A01', 'Add single well - Position of returned well');
 is( $plate->return_well('A01')->plate_type, '96', 'Add single well - Plate type of returned well');
 is( $plate->return_well('A01')->contents, 'String contents', 'Add single well - contents of returned well');
+throws_ok { $plate->return_well(  ) }
+    qr/A\swell\sid\smust\sbe\ssupplied/, 'Try to call return_well with no well';
 throws_ok{ $plate->add_well('well') } qr/method\srequires\sa\sLabWare::Well\sobject/, 'try to add String';
 my $tmp_mock_plate = Test::MockObject->new();
 $tmp_mock_plate->set_isa('Labware::Plate');
@@ -100,8 +100,8 @@ for ( my $i = 3; $i < 12; $i+=3 ){
     );
     push @wells, $well;
 }
-$plate->add_wells( \@wells );
-# 9 tests
+# 12 tests
+ok( $plate->add_wells( \@wells ), 'Add multiple wells' );
 for ( my $i = 3; $i < 12; $i+=3 ){
     my $id = 'A' . $i;
     my $well_id = $id;
@@ -111,7 +111,9 @@ for ( my $i = 3; $i < 12; $i+=3 ){
     is( $plate->return_well($id)->contents, $id, 'add several wells - contents of returned well');
 }
 
-# try to add a well to an already filled well - 1 test
+throws_ok { $plate->add_wells( @wells ) } qr/This\smethod\srequires\san\sArrayRef\sas\sinput/, 'Fail to supply arrayref to add_wells';
+
+# try to add a well to an already filled well
 throws_ok { $plate->add_well( $well ) } qr/Well is not empty!/, 'Attempt to fill an already filled well';
 
 # add column of wells
@@ -125,8 +127,8 @@ foreach ( qw( A B C D E F G H ) ){
     );
     push @wells, $well;
 }
-$plate->add_wells( \@wells );
-# 6 tests
+# 7 tests
+ok( $plate->add_wells( \@wells ), 'Add column of wells');
 foreach ( qw( A D H ) ){
     my $well_id = $_ . '05';
     is( $plate->return_well($well_id)->position, $well_id, 'add column of wells - Position of returned well');
@@ -136,22 +138,34 @@ foreach ( qw( A D H ) ){
 
 my @stuff = qw{ stuffb1 stuffc1 stuffd1 stuffe1 };
 
-# fill single well - 3 tests
-$plate->fill_well( $stuff[0], 'B01' );
+# fill single well - 5 tests
+ok( $plate->fill_well( $stuff[0], 'B01' ), 'fill single well');
 is( $plate->return_well('B01')->position, 'B01', 'fill single well - Position of returned well B01');
 is( $plate->return_well('B01')->plate_type, '96', 'fill single well - Plate type of returned well B01');
 is( $plate->return_well('B01')->contents, 'stuffb1', 'fill single well - contents of returned well B01');
+throws_ok { $plate->fill_well( $stuff[0], ) } qr/Method\sfill_well\srequires\sa\swell\sid/, 'Try to fill well without specifying well id';
 
-# fill several wells - 6 tests
+# fill several wells - 13 tests
 my @list_of_contents = @stuff[1..3];
-$plate->fill_wells_from_starting_well( \@list_of_contents, 'C01' );
+ok( $plate->fill_wells_from_starting_well( \@list_of_contents, 'C01' ), 'fill several wells');
 is( $plate->return_well('D01')->position, 'D01', 'fill several wells - Position of returned well D01');
 is( $plate->return_well('D01')->plate_type, '96', 'fill several wells - Plate type of returned well D01');
 is( $plate->return_well('D01')->contents, 'stuffd1', 'fill several wells - contents of returned well D01');
 
+throws_ok { $plate->fill_wells_from_starting_well( \@list_of_contents,); }
+    qr/Method\sfill_wells_from_starting_well\srequires\sa\sstarting\swell\sid/, 'Try to fills wells without a starting well';
+throws_ok { $plate->fill_wells_from_starting_well(  ); }
+    qr/Method\sfill_wells_from_starting_well\srequires\san\sArrayRef\sof\scontents/, 'Try to fills wells without any contents';
+throws_ok { $plate->fill_wells_from_starting_well( @list_of_contents, ); }
+    qr/The\ssupplied\slist\sof\scontents\smust\sbe\san\sArrayRef/, 'Try to fills wells with an array not arrayref';
+throws_ok { $plate->fill_wells_from_starting_well( {} ); }
+    qr/The\ssupplied\slist\sof\scontents\smust\sbe\san\sArrayRef/, 'Try to fills wells with a hashref';
+throws_ok { $plate->fill_wells_from_starting_well( \@list_of_contents, 'H12'); }
+    qr/Reached\sthe\send\sof\sthe\splate\sand\sstill\shave\scontents\sleft/, 'Try to fills wells with too much stuff';
+
 @list_of_contents = qw{ row-wise-a1 row-wise-a2 row-wise-a3 row-wise-a4 row-wise-a5 row-wise-a6
 row-wise-a7 row-wise-a8 row-wise-a9 row-wise-a10 row-wise-a11 row-wise-a12 };
-$plate_2->fill_wells_from_starting_well( \@list_of_contents, 'A01' );
+ok( $plate_2->fill_wells_from_starting_well( \@list_of_contents, 'A01' ), 'Fill wells row-wise');
 is( $plate_2->return_well('A04')->position, 'A04', 'Fill wells row-wise - Position of returned well A04');
 is( $plate_2->return_well('A04')->plate_type, '96', 'Fill wells row-wise - Plate type of returned well A04');
 is( $plate_2->return_well('A04')->contents, 'row-wise-a4', 'Fill wells row-wise - contents of returned well A04');
@@ -168,8 +182,6 @@ is( $plate->return_well('G01')->contents, 'stuff-2', 'fill single well - content
 is( $plate->return_well('H01')->contents, 'stuff-3', 'fill single well - contents of returned well H01');
 is( $plate->first_empty_well_id, 'A02', 'Get first empty well id');
 
-my $returned_wells = $plate->return_all_wells;
-map { print join("\t", $_->position, $_->contents), "\n" } @{$returned_wells};
 my $plate_4 = Labware::Plate->new(
     plate_name => 'CR-000004a',
     plate_type => '96',
@@ -205,4 +217,45 @@ for ( 1..96 ){
     is( $well_2->contents, $_, "well $_ contents - row-wise" );
 }
 
-#$plate_4->print_all_wells("\t", \*STDOUT );
+# fill half a plate - 4 tests
+my @list_2;
+for ( 1..24 ){
+    push @list_2, $_;
+}
+
+my $plate_6 = Labware::Plate->new(
+    plate_name => 'CR-000004a',
+    plate_type => '96',
+    fill_direction => 'column',
+);
+my $plate_7 = Labware::Plate->new(
+    plate_name => 'CR-000004a',
+    plate_type => '96',
+    fill_direction => 'row',
+);
+$plate_6->fill_wells_from_first_empty_well( \@list_2 );
+$plate_6->fill_wells_from_starting_well( \@list_2, 'A07' );
+
+$plate_7->fill_wells_from_first_empty_well( \@list_2 );
+$plate_7->fill_wells_from_starting_well( \@list_2, 'E1' );
+
+$returned_wells_4 = $plate_6->return_all_wells;
+$returned_wells_5 = $plate_6->return_all_non_empty_wells;
+# test size of array
+is( scalar @{$returned_wells_4}, 96, 'Return all wells column-wise, check number of returned wells');
+is( scalar @{$returned_wells_5}, 48, 'Return all non-empty wells column-wise, check number of returned wells');
+
+#map {print join("\t", $_->position, $_->contents || 'EMPTY' ), "\n"} @{$returned_wells_4};
+
+$returned_wells_6 = $plate_7->return_all_wells;
+$returned_wells_7 = $plate_7->return_all_non_empty_wells;
+# test size of array
+is( scalar @{$returned_wells_6}, 96, 'Return all wells row-wise, check number of returned wells');
+is( scalar @{$returned_wells_7}, 48, 'Return all non-empty wells row-wise, check number of returned wells');
+
+# test some internal methods - 4 tests
+throws_ok { $plate->_check_well_is_empty( 'A', 1 ) } qr/Indexes\smust\sbe\sintegers/, '_check_well_is_empty with string row index';
+throws_ok { $plate->_check_well_is_empty( 2, 'B' ) } qr/Indexes\smust\sbe\sintegers/, '_check_well_is_empty with string column index';
+
+throws_ok { $plate->_increment_indices( 'A', 1 ) } qr/Indexes\smust\sbe\sintegers/, '_increment_indices with string row index';
+throws_ok { $plate->_increment_indices( 2, 'B' ) } qr/Indexes\smust\sbe\sintegers/, '_increment_indices with string column index';
