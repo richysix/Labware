@@ -52,18 +52,6 @@ enum 'Labware::Well::plate_type', [qw( 96 384 )];
 
 =cut
 
-=method plate_name
-
-  Usage       : $well->plate_name
-  Purpose     : Getter for plate_name attribute of the Plate object
-  Returns     : String
-  Parameters  : None
-  Throws      : If input is given
-                If plate attribute is undefined
-  Comments    : None
-
-=cut
-
 has 'plate' => (
     is => 'ro',
     isa => 'Labware::Plate',
@@ -125,7 +113,6 @@ has 'contents' => (
 
 with 'Labware::WellMethods';
 
-## need to add well id checking to BUILDARGS ##
 around BUILDARGS => sub{
     my $method = shift;
     my $self = shift;
@@ -151,6 +138,24 @@ around BUILDARGS => sub{
         confess "method new called without Hash or Hashref.\n";
     }
 };
+
+=method BUILD
+
+  Usage       : 
+  Purpose     : BUILD method, automatically called after object creation to test
+                validity of well position
+  Returns     : 
+  Parameters  : 
+  Throws      : If position supplied to constructor is not a valid well for the
+                type of plate
+  Comments    : 
+
+=cut
+
+sub BUILD {
+    my ( $self, ) = @_;
+    $self->position;
+}
 
 around 'position' => sub {
     my ( $method, $self, $input ) = @_;
