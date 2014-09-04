@@ -186,5 +186,10 @@ around 'plate_type' => sub {
     }
 };
 
+sub is_empty {
+    my ( $self, ) = @_;
+    return $self->contents;
+}
+
 __PACKAGE__->meta->make_immutable;
 1;
