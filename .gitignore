@@ -2,3 +2,4 @@
 perltidy.LOG
 Labware-*
 *.gz
+cover_db/*
