@@ -5,19 +5,21 @@ use Test::Exception;
 use Test::Warn;
 use Test::MockObject;
 
-plan tests => 26 + 3 + 5 + 5 + 4 + 3 + 7 + 12 + 7 + 5 + 13 + 2 + 4 + 96 * 4 + 4 + 4;
+plan tests => 36 + 3 + 5 + 5 + 4 + 3 + 7 + 12 + 7 + 5 + 13 + 2 + 4 + 96 * 4 + 4 + 4 + 14;
 
 use Labware::Plate;
 
 # make a plate object with no attributes
 my $plate = Labware::Plate->new();
 
-# check method calls 26 tests
-my @methods = qw( plate_name plate_type wells fill_direction number_of_columns
-_row_name_for _row_names number_of_rows number_of_columns check_well_id_validity
-_split_well_id _check_row_name_validity _check_column_name_validity _row_name_to_index _col_name_to_index
-add_well add_wells fill_well fill_wells_from_starting_well well_id_to_indices
-next_well_id _increment_by_row _increment_by_column _indices_to_well_id _indices_to_well_number
+# check method calls 36 tests
+my @methods = qw( plate_name plate_type wells fill_direction number_of_rows
+number_of_columns check_well_id_validity _split_well_id _check_row_name_validity _check_column_name_validity
+_row_name_for _row_names _row_name_to_index _col_name_to_index add_well
+add_wells fill_well fill_wells_from_starting_well fill_wells_from_first_empty_well return_well
+return_all_wells return_all_non_empty_wells print_all_wells well_id_to_indices next_well_id
+first_empty_well_id range_to_well_ids _check_well_range _check_well_is_empty _increment_indices
+_increment_by_row _increment_by_column _indices_to_well_id _indices_to_well_number _well_number_to_indices
 _build_empty_wells 
 );
 
@@ -259,3 +261,30 @@ throws_ok { $plate->_check_well_is_empty( 2, 'B' ) } qr/Indexes\smust\sbe\sinteg
 
 throws_ok { $plate->_increment_indices( 'A', 1 ) } qr/Indexes\smust\sbe\sintegers/, '_increment_indices with string row index';
 throws_ok { $plate->_increment_indices( 2, 'B' ) } qr/Indexes\smust\sbe\sintegers/, '_increment_indices with string column index';
+
+# test range_to_well_ids method - 14 tests
+is( join(qw{,}, $plate_6->range_to_well_ids( 'A01-D03' ) ),
+    join(qw{,}, qw{ A01 B01 C01 D01 E01 F01 G01 H01 A02 B02 C02 D02 E02 F02 G02 H02 A03 B03 C03 D03 } ),
+    'range to well_ids col-wise' );
+
+is( join(qw{,}, $plate_7->range_to_well_ids( 'A01-B06' ) ),
+    join(qw{,}, qw{ A01 A02 A03 A04 A05 A06 A07 A08 A09 A10 A11 A12 B01 B02 B03 B04 B05 B06 } ),
+    'range to well_ids row-wise' );
+
+ok( $plate_6->range_to_well_ids( 'A1-D3' ), 'missing zeros' );
+
+throws_ok{ $plate_6->range_to_well_ids( 'WELL-D03' ) } qr/WELL\sis\snot\sa\svalid\swell/, 'throws on incorrect starting well';
+throws_ok{ $plate_6->range_to_well_ids( 'A01-WELL' ) } qr/WELL\sis\snot\sa\svalid\swell/, 'throws on incorrect end well';
+throws_ok{ $plate_6->range_to_well_ids( 'B03-C02' ) } qr/End\swell\scomes\sbefore\sstart\swell/, 'throws on incorrect range - col-wise';
+throws_ok{ $plate_6->range_to_well_ids( 'WELL' ) } qr/Range\sis\snot\sspecified\scorrectly/, 'throws on incorrect range 2';
+throws_ok{ $plate_6->range_to_well_ids( undef ) } qr/Range\sis\sempty/, 'throws on undef range';
+
+ok( $plate_6->range_to_well_ids( 'A01-H01' ), 'single col' );
+throws_ok{ $plate_6->range_to_well_ids( 'C01-A01' ) } qr/End\swell\scomes\sbefore\sstart\swell/, 'throws on incorrect range - col-wise 2';
+
+throws_ok{ $plate_6->_check_well_range( undef, 'A12' ) } qr/Range\sis\snot\sspecified\scorrectly/, 'throws on undef starting well';
+
+throws_ok{ $plate_7->range_to_well_ids( 'C02-B03' ) } qr/End\swell\scomes\sbefore\sstart\swell/, 'throws on incorrect range - row-wise';
+
+ok( $plate_7->range_to_well_ids( 'A01-A10' ), 'single row' );
+throws_ok{ $plate_7->range_to_well_ids( 'A10-A01' ) } qr/End\swell\scomes\sbefore\sstart\swell/, 'throws on incorrect range - row-wise 2';

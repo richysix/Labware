@@ -435,6 +435,115 @@ sub first_empty_well_id {
     return $well_id;
 }
 
+=method range_to_well_ids
+
+  Usage       : $plate->range_to_well_ids( 'A01-B12' );
+  Purpose     : Takes a range of wells and returns a list of the individual
+                well ids between the start and end wells
+  Returns     : ARRAY (List of well ids)
+  Parameters  : String (well id range e.g. A01-B12)
+  Throws      : If range is not defined.
+                If the range is not specified properly.
+                If either the start or the end well is not a valid well id.
+                If the end well comes before the start well on the plate.
+  Comments    : List of wells is returned in the fill direction of the plate
+
+=cut
+
+sub range_to_well_ids {
+    my ( $self, $range, ) = @_;
+    
+    if( !defined $range ){
+        confess "Range is empty. A range must be supplied to range_to_well_id.s\n";
+    }
+    my ( $starting_well, $end_well ) = split /-/, $range;
+    ( $starting_well, $end_well ) = $self->_check_well_range( $starting_well, $end_well );
+    
+    my @well_ids;
+    my $done = 0;
+    my $well_id = $starting_well;
+    push @well_ids, $well_id;
+    while( $well_id ne $end_well ){
+        $well_id = $self->next_well_id( $well_id );
+        push @well_ids, $well_id;
+    }
+    
+    return @well_ids;
+}
+
+# _check_well_range
+# 
+#   Usage       : $plate->_check_well_range;
+#   Purpose     : Check the valid of the two wells in a well range and check the validity of the range.
+#   Returns     : String (Starting well id)
+#                 String (End well id)
+#   Parameters  : String (Starting well id)
+#                 String (End well id)
+#   Throws      : If either the start or the end well is undefined.
+#                 If either the start or the end well is not a valid well id.
+#                 If the end well comes before the start well on the plate.
+#   Comments    : 
+
+sub _check_well_range {
+    my ( $self, $starting_well, $end_well ) = @_;
+    
+    if( !defined $starting_well || !defined $end_well ){
+        confess "Range is not specified correctly.\n",
+            "Range must be like A01-A12\n";
+    }
+    if( length $starting_well == 2 ){
+        substr( $starting_well, 1, 0, '0' );
+    }
+    if( length $end_well == 2 ){
+        substr( $end_well, 1, 0, '0' );
+    }
+    
+    # check validity of starting well and end well
+    foreach my $well_id ( $starting_well, $end_well ){
+        eval { $self->check_well_id_validity( $well_id ) };
+        if( $EVAL_ERROR &&
+           ( $EVAL_ERROR =~ m/Row\sname,.*,\sis\snot\sa\svalid\srow\sname/xms ||
+            $EVAL_ERROR =~ m/Column\sid,.*,\sis\snot\sa\svalid\scolumn\sid/xms ) ){
+            confess "$well_id is not a valid well or range is not specified correctly.\n",
+                "Range must be like A01-A12\n"; 
+        }
+        elsif( $EVAL_ERROR ){
+            confess $EVAL_ERROR;
+        }
+    }
+    
+    # check starting well is before end well
+    my $bad_range = 0;
+    my ( $start_rowi, $start_coli ) = $self->well_id_to_indices( $starting_well );
+    my ( $end_rowi, $end_coli ) = $self->well_id_to_indices( $end_well );
+    if( $self->fill_direction eq 'row' ){
+        if( $end_rowi < $start_rowi ){
+            $bad_range = 1;
+        }
+        elsif( $end_rowi == $start_rowi ){
+            if( $end_coli < $start_coli ){
+                $bad_range = 1;
+            }
+        }
+    }
+    else{
+        if( $end_coli < $start_coli ){
+            $bad_range = 1;
+        }
+        elsif( $end_coli == $start_coli ){
+            if( $end_rowi < $start_rowi ){
+                $bad_range = 1;
+            }
+        }
+    }
+    
+    if( $bad_range ){
+        confess "End well comes before start well: $starting_well-$end_well.\n";
+    }
+    
+    return( $starting_well, $end_well, );
+}
+
 #_check_well_is_empty
 #
 #Usage       : $plate->_check_well_is_empty( '1', '2' );
