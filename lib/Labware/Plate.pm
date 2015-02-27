@@ -108,7 +108,7 @@ has 'wells' => (
 =cut
 
 has 'fill_direction' => (
-    is => 'ro',
+    is => 'rw',
     isa => 'Labware::Plate::direction',
     default => 'column',
 );
