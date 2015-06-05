@@ -186,9 +186,25 @@ around 'plate_type' => sub {
     }
 };
 
+=method is_empty
+
+  Usage       : $plate->is_empty;
+  Purpose     : Tests whether well is empty or not
+  Returns     : 1 if well is empty, 0 otherwise
+  Parameters  : None
+  Throws      : If input is given
+  Comments    :
+
+=cut
+
 sub is_empty {
     my ( $self, ) = @_;
-    return $self->contents;
+    if( !defined $self->contents ){
+        return 1;
+    }
+    else{
+        return 0;
+    }
 }
 
 __PACKAGE__->meta->make_immutable;
