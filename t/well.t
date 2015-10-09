@@ -5,7 +5,7 @@ use Test::Exception;
 use Test::Warn;
 use Test::MockObject;
 
-plan tests => 13 + 8 + 4 + 2 + 4;
+plan tests => 13 + 8 + 4 + 2 + 4 + 2;
 
 use Labware::Well;
 
@@ -107,4 +107,7 @@ is( $well_3->number_of_columns, 24, 'Get num columns 384');
 is( $well->number_of_rows, 8, 'Get num rows 96');
 is( $well_3->number_of_rows, 16, 'Get num rows 384');
 
+# check is_empty - 2 tests
+is( $well->is_empty, 0, 'check is_empty on non-empty well');
+is( Labware::Well->new( position => 'A01' )->is_empty, 1, 'check is_empty on non-empty well');
 

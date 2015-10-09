@@ -18,7 +18,7 @@ use Moose;
 use Moose::Util::TypeConstraints;
 use namespace::autoclean;
 use Labware::Well;
-use Carp qw( cluck confess );
+use Carp qw( croak confess );
 use English qw( -no_match_vars );
 
 enum 'Labware::Plate::plate_type', [qw( 96 384 )];
@@ -344,8 +344,8 @@ sub return_all_non_empty_wells {
 
 =method print_all_wells
 
-  Usage       : $plate->return_all_wells;
-  Purpose     : Getter for all wells
+  Usage       : $plate->print_all_wells;
+  Purpose     : prints wells and their contents to the supplied file handle
   Returns     : ArrayRef of Labware::Well objects
   Parameters  : None
   Throws      : 
@@ -433,6 +433,46 @@ sub first_empty_well_id {
         ( $rowi, $coli ) = $self->_increment_indices( $rowi, $coli ) if !$well_id;
     }
     return $well_id;
+}
+
+=method parse_wells
+
+  Usage       : my @wells = $plate->parse_wells( $wells, );
+  Purpose     : split up either a comma-separated list or range of well ids
+                into an array of well ids
+  Returns     : Array of Str
+  Parameters  : Str (Either comma-separated list or range like A1-A24)
+  Throws      :   
+  Comments    :   
+
+=cut
+
+sub parse_wells {
+    my ( $self, $wells, ) = @_;
+    
+    my @wells;
+    $wells = uc($wells);
+    if( $wells =~ m/\A [A-P]\d+             # single well e.g. A1 or B01
+                        \z/xms ){
+        @wells = ( $wells );
+    }
+    elsif( $wells =~ m/\A [A-P]\d+          # well_id
+                            ,+              # zero or more commas
+                            [A-P]\d+        # well_id e.g. A01,A02,A03,A04
+                        /xms ){
+        @wells = split /,/, $wells;
+    }
+    elsif( $wells =~ m/\A  [A-P]\d+         # well_id
+                            \-              # literal hyphen
+                            [A-P]\d+        # well_id e.g. A1-B3
+                        \z/xms ){
+        @wells = $self->range_to_well_ids( $wells );
+    }
+    else{
+        croak "Couldn't understand wells, $wells!\n";
+    }
+    
+    return @wells;
 }
 
 =method range_to_well_ids

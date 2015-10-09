@@ -5,7 +5,7 @@ use Test::Exception;
 use Test::Warn;
 use Test::MockObject;
 
-plan tests => 36 + 3 + 5 + 5 + 4 + 3 + 7 + 12 + 7 + 5 + 13 + 2 + 4 + 96 * 4 + 4 + 4 + 14;
+plan tests => 36 + 3 + 5 + 5 + 4 + 3 + 7 + 12 + 7 + 5 + 13 + 2 + 4 + 96 * 5 + 4 + 4 + 14 + 6;
 
 use Labware::Plate;
 
@@ -210,6 +210,7 @@ my ( $rowi, $coli );
 for ( 1..96 ){
     my $well = shift @{$returned_wells_2};
     ( $rowi, $coli ) = $plate_4->_well_number_to_indices( $_ );
+    is( $plate_4->_indices_to_well_number( $rowi, $coli ), $_, "well $_ _well_number_to_indices");
     is( $well->position, $row_names[$rowi] . $column_names[$coli], "well $_ position - column-wise" );
     is( $well->contents, $_, "well $_ contents - column-wise" );
     
@@ -288,3 +289,19 @@ throws_ok{ $plate_7->range_to_well_ids( 'C02-B03' ) } qr/End\swell\scomes\sbefor
 
 ok( $plate_7->range_to_well_ids( 'A01-A10' ), 'single row' );
 throws_ok{ $plate_7->range_to_well_ids( 'A10-A01' ) } qr/End\swell\scomes\sbefore\sstart\swell/, 'throws on incorrect range - row-wise 2';
+
+# tests for parse_wells - 6 tests
+is( join(q{-}, $plate_6->parse_wells( 'A01' ) ),
+   'A01', 'parse_wells single well' );
+is( join(q{-}, $plate_6->parse_wells( 'A01,B01,B02,C01,D03' ) ),
+   'A01-B01-B02-C01-D03', 'parse_wells commas' );
+is( join(q{-}, $plate_6->parse_wells( 'a01,b01,b02,c01,d03' ) ),
+   'A01-B01-B02-C01-D03', 'parse_wells commas lowercase' );
+is( join(q{-}, $plate_6->parse_wells( 'A01-D02' ) ),
+   join(qw{-}, qw{ A01 B01 C01 D01 E01 F01 G01 H01 A02 B02 C02 D02 } )
+   , 'parse_wells range col-wise' );
+is( join(q{-}, $plate_7->parse_wells( 'A01-B02' ) ),
+   join(qw{-}, qw{ A01 A02 A03 A04 A05 A06 A07 A08 A09 A10 A11 A12 B01 B02 } )
+   , 'parse_wells range row-wise' );
+throws_ok { $plate_6->parse_wells('WELL1-WELL6') }
+    qr/Couldn't understand wells,/, 'parse_wells throws on malformed input';
