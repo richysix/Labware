@@ -1,5 +1,6 @@
 ## no critic (RequireUseStrict, RequireUseWarnings, RequireTidyCode)
 package Labware::WellMethods;
+
 ## use critic
 
 # ABSTRACT: Role of methods shared between Wells and Plates
@@ -28,7 +29,7 @@ requires 'plate_type';
   Returns     : '8' or '16'
   Parameters  : None
   Throws      : None
-  Comments    : 
+  Comments    :
 
 =cut
 
@@ -47,7 +48,7 @@ sub number_of_rows {
   Returns     : '12' or '24'
   Parameters  : None
   Throws      : None
-  Comments    : 
+  Comments    :
 
 =cut
 
@@ -69,7 +70,7 @@ sub number_of_columns {
                     for the plate type
                 OR if characters 2 and 3 don't form a valid column number
                     for the plate type
-  Comments    : 
+  Comments    :
 
 =cut
 
@@ -85,7 +86,7 @@ sub check_well_id_validity {
 # Purpose     : Splits well id into row name and column name
 # Returns     : Array of Strings ( row_name, column_name )
 # Parameters  : String (well id)
-# Throws      : 
+# Throws      :
 
 sub _split_well_id {
     my ( $self, $well_id ) = @_;
@@ -146,7 +147,7 @@ sub _row_name_for {
 # Purpose     : Gets an array of row_names for type of plate
 # Returns     : Array of Strings
 # Parameters  : None
-# Throws      : 
+# Throws      :
 
 sub _row_names {
     my ( $self, ) = @_;
@@ -161,7 +162,7 @@ sub _row_names {
 # Purpose     : Gets a row index for a given row name
 # Returns     : String ( row name )
 # Parameters  : String ( row index )
-# Throws      : 
+# Throws      :
 
 sub _row_name_to_index {
     my ( $self, $row_name, ) = @_;
@@ -190,7 +191,7 @@ sub _row_name_to_index {
 # Purpose     : Gets a column index for a given column name
 # Returns     : Integer ( column index )
 # Parameters  : String ( column name )
-# Throws      : 
+# Throws      :
 
 sub _col_name_to_index {
     my ( $self, $col_name, ) = @_;
@@ -213,5 +214,3 @@ sub _col_name_to_index {
 #_check_column_name_validity
 #_row_name_to_index
 #_col_name_to_index
-
-

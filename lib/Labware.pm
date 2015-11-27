@@ -1,5 +1,6 @@
 ## no critic (RequireUseStrict, RequireUseWarnings, RequireTidyCode)
 package Labware;
+
 ## use critic
 
 # ABSTRACT: Modules to represent Labware (Plates and Wells)
