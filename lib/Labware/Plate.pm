@@ -452,6 +452,8 @@ sub parse_wells {
     
     my @wells;
     $wells = uc($wells);
+    $wells =~ s/\s+ \z//xms; # trim off white space at the end
+    $wells =~ s/\A \s+//xms; # and at the beginning
     if( $wells =~ m/\A [A-P]\d+             # single well e.g. A1 or B01
                         \z/xms ){
         @wells = ( $wells );
