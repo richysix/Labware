@@ -1,5 +1,6 @@
 ## no critic (RequireUseStrict, RequireUseWarnings, RequireTidyCode)
 package Labware::Well;
+
 ## use critic
 
 # ABSTRACT: Object representing a Well of a microtitre Plate
@@ -141,14 +142,14 @@ around BUILDARGS => sub{
 
 =method BUILD
 
-  Usage       : 
+  Usage       :
   Purpose     : BUILD method, automatically called after object creation to test
                 validity of well position
-  Returns     : 
-  Parameters  : 
+  Returns     :
+  Parameters  :
   Throws      : If position supplied to constructor is not a valid well for the
                 type of plate
-  Comments    : 
+  Comments    :
 
 =cut
 
@@ -172,7 +173,7 @@ around 'position' => sub {
 
 around 'plate_type' => sub {
     my ( $method, $self, $input ) = @_;
-    
+
     if( $input ){
         die "Can't change a read-only accessor!\n";
     }

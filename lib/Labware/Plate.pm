@@ -1,5 +1,6 @@
 ## no critic (RequireUseStrict, RequireUseWarnings, RequireTidyCode)
 package Labware::Plate;
+
 ## use critic
 
 # ABSTRACT: Object representing a microtitre Plate
@@ -50,7 +51,7 @@ enum 'Labware::Plate::direction', [qw( row column )];
   Returns     : String
   Parameters  : None
   Throws      : If input is given
-  Comments    : 
+  Comments    :
 
 =cut
 
@@ -67,7 +68,7 @@ has 'plate_name' => (
   Returns     : String ('96' or '384')
   Parameters  : None
   Throws      : If input is given
-  Comments    : 
+  Comments    :
 
 =cut
 
@@ -85,7 +86,7 @@ has 'plate_type' => (
   Returns     : ArrayRef of ArrayRefs of Labware::Well objects
   Parameters  : None
   Throws      : If input is given
-  Comments    : 
+  Comments    :
 
 =cut
 
@@ -122,7 +123,7 @@ with 'Labware::WellMethods';
   Returns     : 1 if successful
   Parameters  : Labware::Well object
   Throws      : If well is already filled
-  Comments    : 
+  Comments    :
 
 =cut
 
@@ -145,8 +146,8 @@ sub add_well {
   Purpose     : method to add a list of wells to a plate
   Returns     : 1 if successful
   Parameters  : ArrayRef of Labware::Well objects
-  Throws      : If input is not an ArrayRef 
-  Comments    : 
+  Throws      : If input is not an ArrayRef
+  Comments    :
 
 =cut
 
@@ -164,7 +165,7 @@ sub add_wells {
 =method fill_well
 
   Usage       : $plate->fill_well( $contents, 'A01' );
-  Purpose     : create a new Labware::Well object, fill it with the supplied contents and 
+  Purpose     : create a new Labware::Well object, fill it with the supplied contents and
                 add it to the plate
   Returns     : 1 if successful
   Parameters  : ( Any, String )
@@ -204,7 +205,7 @@ sub fill_well {
 
 sub fill_wells_from_starting_well {
     my ( $self, $list_of_contents, $well_id, ) = @_;
-    
+
     if( !$list_of_contents ){
         confess "Method fill_wells_from_starting_well requires an ArrayRef of contents.\n";
     }
@@ -282,7 +283,7 @@ sub return_well {
   Purpose     : Getter for all wells, whether empty or not
   Returns     : ArrayRef of Labware::Well objects
   Parameters  : None
-  Throws      : 
+  Throws      :
   Comments    : Wells are unrolled into an Array in plate-fill order
 
 =cut
@@ -314,7 +315,7 @@ sub return_all_wells {
   Purpose     : Getter for all non-empty wells in plate order
   Returns     : ArrayRef of Labware::Well objects
   Parameters  : None
-  Throws      : 
+  Throws      :
   Comments    : Wells are unrolled into an Array in plate-fill order
 
 =cut
@@ -348,14 +349,14 @@ sub return_all_non_empty_wells {
   Purpose     : prints wells and their contents to the supplied file handle
   Returns     : ArrayRef of Labware::Well objects
   Parameters  : None
-  Throws      : 
+  Throws      :
   Comments    :
 
 =cut
 
 sub print_all_wells {
     my ( $self, $sep, $fh ) = @_;
-    
+
     if( !$sep ){
         $sep = "\t";
     }
@@ -379,7 +380,7 @@ sub print_all_wells {
   Purpose     : Convert well id to two indices
   Returns     : ( Integer, Integer )
   Parameters  : String (well id)
-  Throws      : 
+  Throws      :
   Comments    :
 
 =cut
@@ -398,7 +399,7 @@ sub well_id_to_indices {
   Purpose     : Return the next well for a given well id
   Returns     : String (next well id)
   Parameters  : String (well id)
-  Throws      : 
+  Throws      :
   Comments    :
 
 =cut
@@ -416,7 +417,7 @@ sub next_well_id {
   Purpose     : Find the first empty well and return the id
   Returns     : String (empty well id)
   Parameters  : None
-  Throws      : 
+  Throws      :
   Comments    :
 
 =cut
@@ -442,14 +443,14 @@ sub first_empty_well_id {
                 into an array of well ids
   Returns     : Array of Str
   Parameters  : Str (Either comma-separated list or range like A1-A24)
-  Throws      :   
-  Comments    :   
+  Throws      :
+  Comments    :
 
 =cut
 
 sub parse_wells {
     my ( $self, $wells, ) = @_;
-    
+
     my @wells;
     $wells = uc($wells);
     $wells =~ s/\s+ \z//xms; # trim off white space at the end
@@ -473,7 +474,7 @@ sub parse_wells {
     else{
         croak "Couldn't understand wells, $wells!\n";
     }
-    
+
     return @wells;
 }
 
@@ -494,13 +495,13 @@ sub parse_wells {
 
 sub range_to_well_ids {
     my ( $self, $range, ) = @_;
-    
+
     if( !defined $range ){
         confess "Range is empty. A range must be supplied to range_to_well_id.s\n";
     }
     my ( $starting_well, $end_well ) = split /-/, $range;
     ( $starting_well, $end_well ) = $self->_check_well_range( $starting_well, $end_well );
-    
+
     my @well_ids;
     my $done = 0;
     my $well_id = $starting_well;
@@ -509,12 +510,12 @@ sub range_to_well_ids {
         $well_id = $self->next_well_id( $well_id );
         push @well_ids, $well_id;
     }
-    
+
     return @well_ids;
 }
 
 # _check_well_range
-# 
+#
 #   Usage       : $plate->_check_well_range;
 #   Purpose     : Check the valid of the two wells in a well range and check the validity of the range.
 #   Returns     : String (Starting well id)
@@ -524,11 +525,11 @@ sub range_to_well_ids {
 #   Throws      : If either the start or the end well is undefined.
 #                 If either the start or the end well is not a valid well id.
 #                 If the end well comes before the start well on the plate.
-#   Comments    : 
+#   Comments    :
 
 sub _check_well_range {
     my ( $self, $starting_well, $end_well ) = @_;
-    
+
     if( !defined $starting_well || !defined $end_well ){
         confess "Range is not specified correctly.\n",
             "Range must be like A01-A12\n";
@@ -539,7 +540,7 @@ sub _check_well_range {
     if( length $end_well == 2 ){
         substr( $end_well, 1, 0, '0' );
     }
-    
+
     # check validity of starting well and end well
     foreach my $well_id ( $starting_well, $end_well ){
         eval { $self->check_well_id_validity( $well_id ) };
@@ -547,13 +548,13 @@ sub _check_well_range {
            ( $EVAL_ERROR =~ m/Row\sname,.*,\sis\snot\sa\svalid\srow\sname/xms ||
             $EVAL_ERROR =~ m/Column\sid,.*,\sis\snot\sa\svalid\scolumn\sid/xms ) ){
             confess "$well_id is not a valid well or range is not specified correctly.\n",
-                "Range must be like A01-A12\n"; 
+                "Range must be like A01-A12\n";
         }
         elsif( $EVAL_ERROR ){
             confess $EVAL_ERROR;
         }
     }
-    
+
     # check starting well is before end well
     my $bad_range = 0;
     my ( $start_rowi, $start_coli ) = $self->well_id_to_indices( $starting_well );
@@ -578,11 +579,11 @@ sub _check_well_range {
             }
         }
     }
-    
+
     if( $bad_range ){
         confess "End well comes before start well: $starting_well-$end_well.\n";
     }
-    
+
     return( $starting_well, $end_well, );
 }
 
@@ -640,7 +641,7 @@ sub _increment_indices {
 #Purpose     : increment the supplied row and column indices by row
 #Returns     : ( Integer, Integer )
 #Parameters  : ( Integer, Integer )
-#Throws      : 
+#Throws      :
 #Comments    :
 
 sub _increment_by_row {
@@ -662,7 +663,7 @@ sub _increment_by_row {
 #Purpose     : increment the supplied row and column indices by column
 #Returns     : ( Integer, Integer )
 #Parameters  : ( Integer, Integer )
-#Throws      : 
+#Throws      :
 #Comments    :
 
 sub _increment_by_column {
@@ -684,7 +685,7 @@ sub _increment_by_column {
 #Purpose     : returns a well_id for the supplied row and column indices
 #Returns     : String
 #Parameters  : ( Integer, Integer )
-#Throws      : 
+#Throws      :
 #Comments    :
 
 sub _indices_to_well_id {
@@ -702,7 +703,7 @@ sub _indices_to_well_id {
 #              well numbers start at 1 (A01)
 #Returns     : Integer
 #Parameters  : ( Integer, Integer )
-#Throws      : 
+#Throws      :
 #Comments    :
 
 sub _indices_to_well_number {
@@ -721,7 +722,7 @@ sub _indices_to_well_number {
 #Purpose     : Converts a number to row and column indices
 #Returns     : ( Integer, Integer )
 #Parameters  : Integer
-#Throws      : 
+#Throws      :
 #Comments    :
 
 sub _well_number_to_indices {
@@ -744,7 +745,7 @@ sub _well_number_to_indices {
 #Purpose     : Creates an Array of Arrays and returns a Ref to it
 #Returns     : ArrayRef of ArrayRefs
 #Parameters  : None
-#Throws      : 
+#Throws      :
 #Comments    :
 
 sub _build_empty_wells {
